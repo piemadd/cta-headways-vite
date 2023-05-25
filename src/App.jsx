@@ -97,7 +97,7 @@ const App = () => {
           allDestinations[`${line}-${stationKey}`] = {
             line,
             stationKey,
-            headways: `${lineData[stationKey]} min`,
+            headways: `${Math.round(lineData[stationKey].avgHeadway)} min`,
           };
         });
       });
@@ -117,8 +117,7 @@ const App = () => {
   return (
     <>
       <h1>CTA System Headways</h1>
-      <p>These average headways are currently broken and are being worked on. DO NOT TRUST THIS SHIT DOG!!!!</p>
-      <p>v0.0.2a</p>
+      <p>v0.1.0</p>
       <p>Made by <a href='https://piemadd.com/'>Piero</a></p>
       {loading ? (
         <p>Loading...</p>
