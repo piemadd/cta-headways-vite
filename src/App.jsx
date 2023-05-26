@@ -135,7 +135,7 @@ const App = () => {
     <>
       <h1>CTA System Headways</h1>
       <p>
-        v0.2.0 | Made by <a href='https://piemadd.com/'>Piero</a>
+        v0.2.1 | Made by <a href='https://piemadd.com/'>Piero</a>
       </p>
       {loading ? (
         <p>Loading...</p>

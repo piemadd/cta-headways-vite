@@ -27,7 +27,7 @@ const Map = () => {
         center: [41.884579601743276, -87.6279871036212],
         glyphs:
           "https://cdn.jsdelivr.net/gh/piemadd/fonts@54b954f510dc79e04ae47068c5c1f2ee39a69216/_output/{fontstack}/{range}.pbf",
-        layers: layers("protomaps","light"),
+        layers: layers("protomaps","black"),
         bearing: 0,
         sources: {
           protomaps: {
