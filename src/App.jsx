@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import Map from "./Map";
 
 const endpoint = "https://ctaheadwaysapi.piemadd.com/all";
 
@@ -66,8 +67,9 @@ const lines = {
 
 const App = () => {
   const [destinationHeadways, setDestinationHeadways] = useState({});
+  const [runNumbers, setRunNumbers] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [dataSource, setDataSource] = useState("line");
+  const [dataSource, setDataSource] = useState("table");
   const [lastUpdated, setLastUpdated] = useState(null);
 
   useEffect(() => {
@@ -77,6 +79,7 @@ const App = () => {
 
       let allDestinations = {};
       //let allStations = {};
+      let allRunNumbers = [];
 
       //filling in default data for non tracking trains
       Object.keys(lines).forEach((line) => {
@@ -98,14 +101,25 @@ const App = () => {
           allDestinations[`${line}-${stationKey}`] = {
             line,
             stationKey,
-            headways: `Every ~${Math.round(lineData[stationKey].avgHeadway)} min`,
+            headways: `Every ~${Math.round(
+              lineData[stationKey].avgHeadway
+            )} min`,
             numOfTrains: lineData[stationKey].runNumbers.length,
           };
+
+          allRunNumbers = [
+            ...allRunNumbers,
+            ...lineData[stationKey].runNumbers,
+          ];
         });
       });
 
+      //removing duplicates from allRunNumbers
+      allRunNumbers = [...new Set(allRunNumbers)];
+
       setDestinationHeadways(allDestinations);
       //setLineHeadways(allStations);
+      setRunNumbers(allRunNumbers);
       setLoading(false);
       setLastUpdated(new Date());
 
@@ -120,81 +134,90 @@ const App = () => {
   return (
     <>
       <h1>CTA System Headways</h1>
-      <p>v0.1.1</p>
-      <p>Made by <a href='https://piemadd.com/'>Piero</a></p>
-      {
-        lastUpdated ? (
-          <p>Last Updated: {lastUpdated.toLocaleString()}</p>
-        ) : null
-      }
+      <p>
+        v0.2.0 | Made by <a href='https://piemadd.com/'>Piero</a>
+      </p>
       {loading ? (
         <p>Loading...</p>
       ) : (
-        <main>
+        <>
+          <p>Last Updated: {lastUpdated.toLocaleString()}</p>
           <p
             style={{
               textAlign: "center",
-              fontSize: "1.5rem",
               marginBottom: "8px",
             }}
           >
-            Sort Data by
+            {runNumbers.length} trains are currently running
           </p>
-          <div className='data-source-selector'>
-            <button
-              type='radio'
-              name='data-source'
-              id='line'
-              value='line'
-              onClick={(e) => {
-                console.log("Setting to", e.target.value);
-                setDataSource(e.target.value);
-              }}
-              className={
-                dataSource === "line" ? "data-source-selected" : undefined
-              }
-            >
-              Line
-            </button>
-            <button
-              type='radio'
-              name='data-source'
-              id='station'
-              value='station'
-              onClick={(e) => {
-                console.log("Setting to", e.target.value);
-                setDataSource(e.target.value);
-              }}
-              className={
-                dataSource === "station" ? "data-source-selected" : undefined
-              }
-            >
-              Station
-            </button>
-          </div>
-          {dataSource === "line" ? (
-            <section className='headways'>
-              {Object.values(destinationHeadways).map((destination) => {
-                return (
-                  <div key={`${destination.line}-${destination.stationKey}`} style={{
-                    backgroundColor: lines[destination.line].color,
-                    color: lines[destination.line].textColor,
-                  }}>
-                    <p>{lines[destination.line].name} Line towards</p>
-                    <h2>{destination.stationKey}</h2>
-                    <p style={{
-                      fontSize: "1.5rem",
-                    }}>{destination.headways}</p>
-                    <p>{destination.numOfTrains} {destination.numOfTrains === 1 ? 'train' : 'trains'} running</p>
-                  </div>
-                );
-              })}
-            </section>
-          ) : null}
-          {dataSource === "station" ? (
-            <p>Sorry, this section is currently being worked on!</p>
-          ) : null}
-        </main>
+          <main>
+            <div className='data-source-selector'>
+              <button
+                type='radio'
+                name='data-source'
+                id='table'
+                value='table'
+                onClick={(e) => {
+                  console.log("Setting to", e.target.value);
+                  setDataSource(e.target.value);
+                }}
+                className={
+                  dataSource === "table" ? "data-source-selected" : undefined
+                }
+              >
+                Table
+              </button>
+              <button
+                type='radio'
+                name='data-source'
+                id='map'
+                value='map'
+                onClick={(e) => {
+                  console.log("Setting to", e.target.value);
+                  setDataSource(e.target.value);
+                }}
+                className={
+                  dataSource === "map" ? "data-source-selected" : undefined
+                }
+              >
+                Map
+              </button>
+            </div>
+            {dataSource === "table" ? (
+              <section className='headways'>
+                {Object.values(destinationHeadways).map((destination) => {
+                  return (
+                    <div
+                      key={`${destination.line}-${destination.stationKey}`}
+                      style={{
+                        backgroundColor: lines[destination.line].color,
+                        color: lines[destination.line].textColor,
+                      }}
+                    >
+                      <p>{lines[destination.line].name} Line towards</p>
+                      <h2>{destination.stationKey}</h2>
+                      <p
+                        style={{
+                          fontSize: "1.5rem",
+                        }}
+                      >
+                        {destination.headways}
+                      </p>
+                      <p>
+                        {destination.numOfTrains}{" "}
+                        {destination.numOfTrains === 1 ? "train" : "trains"}{" "}
+                        running
+                      </p>
+                    </div>
+                  );
+                })}
+              </section>
+            ) : null}
+            {dataSource === "map" ? (
+              <Map/>
+            ) : null}
+          </main>
+        </>
       )}
     </>
   );
