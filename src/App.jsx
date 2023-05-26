@@ -101,9 +101,10 @@ const App = () => {
           allDestinations[`${line}-${stationKey}`] = {
             line,
             stationKey,
-            headways: `Every ~${Math.round(
-              lineData[stationKey].avgHeadway
-            )} min`,
+            headways:
+              lineData[stationKey].runNumbers.length === 1
+                ? `in ${Math.round(lineData[stationKey].avgHeadway)} min`
+                : `Every ~${Math.round(lineData[stationKey].avgHeadway)} min`,
             numOfTrains: lineData[stationKey].runNumbers.length,
           };
 
@@ -135,7 +136,7 @@ const App = () => {
     <>
       <h1>CTA System Headways</h1>
       <p>
-        v0.2.1 | Made by <a href='https://piemadd.com/'>Piero</a>
+        v0.2.2 | Made by <a href='https://piemadd.com/'>Piero</a>
       </p>
       {loading ? (
         <p>Loading...</p>
@@ -196,6 +197,9 @@ const App = () => {
                     >
                       <p>{lines[destination.line].name} Line towards</p>
                       <h2>{destination.stationKey}</h2>
+                      {destination.numOfTrains === 1 ? (
+                        <p>Only train terminates</p>
+                      ) : null}
                       <p
                         style={{
                           fontSize: "1.5rem",
@@ -203,19 +207,19 @@ const App = () => {
                       >
                         {destination.headways}
                       </p>
-                      <p>
-                        {destination.numOfTrains}{" "}
-                        {destination.numOfTrains === 1 ? "train" : "trains"}{" "}
-                        running
-                      </p>
+                      {destination.numOfTrains === 1 ? null : (
+                        <p>
+                          {destination.numOfTrains}{" "}
+                          {destination.numOfTrains === 1 ? "train" : "trains"}{" "}
+                          running
+                        </p>
+                      )}
                     </div>
                   );
                 })}
               </section>
             ) : null}
-            {dataSource === "map" ? (
-              <Map/>
-            ) : null}
+            {dataSource === "map" ? <Map /> : null}
           </main>
         </>
       )}

@@ -47,6 +47,7 @@ const Map = () => {
       },
       center: [lng, lat],
       zoom: zoom,
+      maxZoom: 15,
     });
   });
 
