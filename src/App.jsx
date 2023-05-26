@@ -66,9 +66,9 @@ const lines = {
 
 const App = () => {
   const [destinationHeadways, setDestinationHeadways] = useState({});
-  //const [lineHeadways, setLineHeadways] = useState({});
   const [loading, setLoading] = useState(true);
   const [dataSource, setDataSource] = useState("line");
+  const [lastUpdated, setLastUpdated] = useState(null);
 
   useEffect(() => {
     const updateData = async () => {
@@ -85,6 +85,7 @@ const App = () => {
             line,
             stationKey: destination,
             headways: "N/A",
+            numOfTrains: 0,
           };
         });
       });
@@ -97,7 +98,8 @@ const App = () => {
           allDestinations[`${line}-${stationKey}`] = {
             line,
             stationKey,
-            headways: `${Math.round(lineData[stationKey].avgHeadway)} min`,
+            headways: `Every ~${Math.round(lineData[stationKey].avgHeadway)} min`,
+            numOfTrains: lineData[stationKey].runNumbers.length,
           };
         });
       });
@@ -105,6 +107,7 @@ const App = () => {
       setDestinationHeadways(allDestinations);
       //setLineHeadways(allStations);
       setLoading(false);
+      setLastUpdated(new Date());
 
       setTimeout(() => updateData(), Number(data.interval));
 
@@ -117,8 +120,13 @@ const App = () => {
   return (
     <>
       <h1>CTA System Headways</h1>
-      <p>v0.1.0</p>
+      <p>v0.1.1</p>
       <p>Made by <a href='https://piemadd.com/'>Piero</a></p>
+      {
+        lastUpdated ? (
+          <p>Last Updated: {lastUpdated.toLocaleString()}</p>
+        ) : null
+      }
       {loading ? (
         <p>Loading...</p>
       ) : (
@@ -177,6 +185,7 @@ const App = () => {
                     <p style={{
                       fontSize: "1.5rem",
                     }}>{destination.headways}</p>
+                    <p>{destination.numOfTrains} {destination.numOfTrains === 1 ? 'train' : 'trains'} running</p>
                   </div>
                 );
               })}
