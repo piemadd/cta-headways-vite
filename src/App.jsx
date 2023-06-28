@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import Map from "./Map";
 
-const endpoint = "https://ctaheadwaysapi.piemadd.com/all";
+const endpoint = "https://store.piemadd.com/cta_trains";
 
 const lines = {
   Red: {
@@ -68,6 +68,7 @@ const lines = {
 const App = () => {
   const [destinationHeadways, setDestinationHeadways] = useState({});
   const [runNumbers, setRunNumbers] = useState([]);
+  const [trains, setTrains] = useState([]); //trains that are currently being displayed
   const [loading, setLoading] = useState(true);
   const [dataSource, setDataSource] = useState("table");
   const [lastUpdated, setLastUpdated] = useState(null);
@@ -121,6 +122,7 @@ const App = () => {
       setDestinationHeadways(allDestinations);
       //setLineHeadways(allStations);
       setRunNumbers(allRunNumbers);
+      setTrains(Object.values(data.trains));
       setLoading(false);
       setLastUpdated(new Date());
 
@@ -136,7 +138,7 @@ const App = () => {
     <>
       <h1>CTA System Headways</h1>
       <p>
-        v0.2.2 | Made by <a href='https://piemadd.com/'>Piero</a>
+        v0.2.3 | Made by <a href='https://piemadd.com/'>Piero</a>
       </p>
       {loading ? (
         <p>Loading...</p>
@@ -219,7 +221,7 @@ const App = () => {
                 })}
               </section>
             ) : null}
-            {dataSource === "map" ? <Map /> : null}
+            {dataSource === "map" ? <Map trains={trains} lines={lines} /> : null}
           </main>
         </>
       )}

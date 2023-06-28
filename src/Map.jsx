@@ -1,22 +1,47 @@
-import { useRef, useEffect, useState } from "react";
+/* eslint-disable react/prop-types */
+import { useRef, useEffect, useState, useMemo } from "react";
 import * as pmtiles from "pmtiles";
 import layers from "protomaps-themes-base";
 import maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
+import stations from "./stations.json";
 //import './map.css';
 
-const Map = () => {
+const radsToDegs = (rads) => (rads * 180) / Math.PI;
+
+const Map = (props) => {
   const mapContainer = useRef(null);
   const map = useRef(null);
   const [lng] = useState(-87.63142947838614);
   const [lat] = useState(41.882913703166246);
   const [zoom] = useState(11);
 
+  const trains = useMemo(() => props.trains ?? [], [props.trains]);
+
   let protocol = new pmtiles.Protocol();
   maplibregl.addProtocol("pmtiles", protocol.tile);
 
   useEffect(() => {
-    if (map.current) return; //stops map from intializing more than once
+    if (map.current) {
+      map.current.on("load", () => {
+        Object.values(stations).forEach((station) => {
+          new maplibregl.Marker({
+            color: "#aaaaaa",
+          })
+            .setLngLat([station.lon, station.lat])
+            .addTo(map.current);
+        });
+
+        trains.forEach((train) => {
+          new maplibregl.Marker({
+            color: props.lines[train.line].color,
+          })
+            .setLngLat([train.lon, train.lat])
+            .setRotation(radsToDegs(train.heading))
+            .addTo(map.current);
+        });
+      });
+    }
     map.current = new maplibregl.Map({
       container: mapContainer.current,
       style: {
@@ -27,7 +52,7 @@ const Map = () => {
         center: [41.884579601743276, -87.6279871036212],
         glyphs:
           "https://cdn.jsdelivr.net/gh/piemadd/fonts@54b954f510dc79e04ae47068c5c1f2ee39a69216/_output/{fontstack}/{range}.pbf",
-        layers: layers("protomaps","black"),
+        layers: layers("protomaps", "black"),
         bearing: 0,
         sources: {
           protomaps: {
@@ -49,11 +74,11 @@ const Map = () => {
       zoom: zoom,
       maxZoom: 15,
     });
-  });
 
-  return (
-    <div ref={mapContainer} className='map' />
-  );
+    console.log("Map initialized");
+  }, [lat, lng, trains, zoom, props.lines]);
+
+  return <div ref={mapContainer} className='map' />;
 };
 
 export default Map;
